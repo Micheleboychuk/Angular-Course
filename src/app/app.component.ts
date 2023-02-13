@@ -1,32 +1,103 @@
 import { Component } from '@angular/core';
+import {Utility} from "./services/utility";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'mb-root',
   template: `
-    <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center" class="content">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <span style="display: block">{{ title }} app is running!</span>
-      <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-    </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    <router-outlet></router-outlet>
+
+    <h1>{{genere === "M" ? "Maschio" : "Femmina"}}</h1>
+    <h2 (click)="clickHandler($event)">Ciao Mondo!</h2>
+    <h4 *ngIf="visibile"> Uso della Direttiva *ngIf </h4>
+    <button (click)="hideWords()"> Nascondi la scritta sopra </button>
+    <li *ngFor="let user of users2">
+      {{user}}
+    </li>
+    <h2></h2>
+    <input type="text" (keydown)="inputHandler($event)">
+    <h2></h2>
+    <button [disabled]="image" (click)="load()">Carica Immagine</button>
+    <button [disabled]="!image" (click)="unload()">Nascondi Immagine</button>
+    <h2></h2>
+    <img *ngIf="image" [src]="image">
+    <h2>-------COMPONENTS---------------</h2>
+    <app-hello></app-hello>
+
+    <h2>-------Pepes---------------</h2>
+    DATE: {{today | date:'dd MMM yyyy hh:mm:ss'}}
+    <h2></h2>
+    Money: {{monay | currency: 'grivna '}}
+    <h2></h2>
+    Bitcoin: {{bitcoin | number}}
+    <h2></h2>
+    JSON: <pre>{{myJSON | json}}</pre>
+    <h2>----------------------</h2>
+
+    <h2>----------> CUSTOM TYPES  <---------------</h2>
+    <li *ngFor="let user of users">ID: {{user.id}} | Name: {{user.name}} </li>
+    <h2>----------------------</h2>
+    <h2>----------> USO di HTTP Client  <---------------</h2>
+    <li *ngFor="let utente of utenti">
+      {{utente.name}} ---> {{utente.id}}
+    </li>
+    <h2>----------------------</h2>
   `,
   styles: []
 })
 export class AppComponent {
-  title = 'ProgettoAngular-2';
+
+genere = "M";
+visibile = true;
+image: string = '';
+
+users2 = ['Misha','Giuseppe','Vincenzo'];
+  hideWords() {
+    this.visibile = !this.visibile;
+  }
+  // stampa nella consol quante volte abbiamo cliccato sul tah h2
+  clickHandler(event: MouseEvent): void {
+   console.log('click', event)
+  }
+
+  inputHandler(event: KeyboardEvent) {
+    const target = event.target as HTMLInputElement;
+    console.log('lettera', target.value)
+  }
+
+  load() {
+    this.image = 'https://angular.io/assets/images/logos/angular/angular.png';
+  }
+
+  unload() {
+    this.image = '';
+  }
+
+  //----------Pipes------------------
+  today = Date.now();
+  monay = 1200;
+  bitcoin = 0.123646;
+  myJSON = {id: 1, name: 'Misha' };
+
+  //----------Custom types------------------
+  users: User[];
+  utenti: User[] = [];
+  constructor(utils: Utility, http: HttpClient) {
+    const  result = utils.add(3,1);
+    console.log('il risultato è:' + result);
+    this.users = [
+      {id: 1, name: 'Misha'},
+      {id: 2, name: 'Andrea'},
+      {id: 3, name: 'Luca'},
+    ];
+    this.users.push({id: 4, name: 'Vincenzo'});
+    http.get<User[]>('https://jsonplaceholder.typicode.com/users')
+        .subscribe(result => {
+          this.utenti = result;
+        });
+  }
+
+}
+interface User {
+  id: number;
+  name: string;
 }
